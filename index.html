@@ -10,15 +10,24 @@
 
 body{
 font-family:Arial, Helvetica, sans-serif;
-background:linear-gradient(135deg,#5f9cff,#6c5ce7);
+background:linear-gradient(135deg,#a8c8ff,#c9b6ff);
+background-size:400% 400%;
+animation:bgMove 12s infinite alternate;
 min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
+margin:0;
+}
+
+@keyframes bgMove{
+0%{background-position:left;}
+100%{background-position:right;}
 }
 
 .container{
-background:white;
+background:rgba(255,255,255,0.8);
+backdrop-filter:blur(10px);
 padding:25px;
 border-radius:15px;
 width:350px;
@@ -27,7 +36,7 @@ box-shadow:0 10px 25px rgba(0,0,0,0.2);
 
 h1{
 text-align:center;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
 .inputBox{
@@ -45,15 +54,20 @@ border:1px solid #ccc;
 button{
 padding:10px 15px;
 border:none;
-background:#6c5ce7;
+background:#6c7cff;
 color:white;
 border-radius:8px;
 cursor:pointer;
 }
 
+button:hover{
+opacity:0.9;
+}
+
 ul{
 list-style:none;
 margin-top:20px;
+padding:0;
 }
 
 li{
@@ -64,6 +78,18 @@ border-radius:8px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+animation:fadeIn .3s ease;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
 }
 
 .done{
@@ -80,6 +106,40 @@ border-radius:5px;
 cursor:pointer;
 }
 
+.progress{
+height:8px;
+background:#eee;
+border-radius:10px;
+margin-top:15px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:#6c7cff;
+transition:0.3s;
+}
+
+.dark{
+background:#0f172a;
+color:white;
+}
+
+.dark .container{
+background:rgba(30,41,59,0.9);
+}
+
+.dark li{
+background:#334155;
+}
+
+.toggleDark{
+margin-top:10px;
+width:100%;
+background:#222;
+}
+
 </style>
 
 </head>
@@ -94,15 +154,24 @@ cursor:pointer;
 <button onclick="addTask()">Add</button>
 </div>
 
+<div class="progress">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+
+<button class="toggleDark" onclick="toggleDark()">Dark Mode</button>
+
 <ul id="taskList"></ul>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
 
 let tasks = JSON.parse(localStorage.getItem("tasks")) || []
 
 function render(){
+
 let list = document.getElementById("taskList")
 list.innerHTML=""
 
@@ -119,13 +188,16 @@ list.appendChild(li)
 
 })
 
+updateProgress()
+
 localStorage.setItem("tasks",JSON.stringify(tasks))
+
 }
 
 function addTask(){
 
 let input = document.getElementById("taskInput")
-let text = input.value
+let text = input.value.trim()
 
 if(text==="") return
 
@@ -149,6 +221,23 @@ function removeTask(i){
 tasks.splice(i,1)
 render()
 
+}
+
+function updateProgress(){
+
+let done = tasks.filter(t=>t.done).length
+let percent = tasks.length ? (done/tasks.length)*100 : 0
+
+document.getElementById("progressBar").style.width = percent+"%"
+
+if(percent===100 && tasks.length>0){
+confetti()
+}
+
+}
+
+function toggleDark(){
+document.body.classList.toggle("dark")
 }
 
 render()
